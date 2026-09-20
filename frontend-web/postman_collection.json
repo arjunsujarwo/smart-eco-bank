@@ -1,0 +1,294 @@
+{
+  "info": {
+    "name": "Smart Eco Bank API",
+    "description": "Headless API for Smart Eco Bank",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api"
+    },
+    {
+      "key": "token",
+      "value": "YOUR_SANCTUM_TOKEN"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"]},
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "email", "value": "admin@example.com", "type": "text"},
+                {"key": "password", "value": "password", "type": "text"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {"raw": "{{base_url}}/register", "host": ["{{base_url}}"], "path": ["register"]},
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "full_name", "value": "John Doe", "type": "text"},
+                {"key": "phone", "value": "08123456789", "type": "text"},
+                {"key": "address", "value": "Jakarta", "type": "text"},
+                {"key": "email", "value": "johndoe@example.com", "type": "text"},
+                {"key": "password", "value": "password123", "type": "text"},
+                {"key": "password_confirmation", "value": "password123", "type": "text"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/logout", "host": ["{{base_url}}"], "path": ["logout"]}
+          }
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Accept", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{token}}"}
+            ],
+            "url": {"raw": "{{base_url}}/user", "host": ["{{base_url}}"], "path": ["user"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "User (Nasabah)",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/dashboard", "host": ["{{base_url}}"], "path": ["dashboard"]}
+          }
+        },
+        {
+          "name": "AI Scan Process",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/ai-scan", "host": ["{{base_url}}"], "path": ["ai-scan"]},
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "waste_image", "type": "file"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "AI Scan Submit",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/ai-scan/submit", "host": ["{{base_url}}"], "path": ["ai-scan", "submit"]},
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "location_id", "value": "1", "type": "text"},
+                {"key": "category_id", "value": "1", "type": "text"},
+                {"key": "weight_gram", "value": "200", "type": "text"},
+                {"key": "confidence", "value": "95.5", "type": "text"},
+                {"key": "category_name", "value": "Non-Organic Waste", "type": "text"},
+                {"key": "product_name", "value": "Botol Plastik", "type": "text"},
+                {"key": "message", "value": "Sampah plastik", "type": "text"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Locations API",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {
+              "raw": "{{base_url}}/locations?lat=-6.200000&long=106.816666",
+              "host": ["{{base_url}}"],
+              "path": ["locations"],
+              "query": [
+                {"key": "lat", "value": "-6.200000"},
+                {"key": "long", "value": "106.816666"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Transaction History",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/history", "host": ["{{base_url}}"], "path": ["history"]}
+          }
+        },
+        {
+          "name": "Scan QR Code",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/scan-qr", "host": ["{{base_url}}"], "path": ["scan-qr"]},
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "qr_token", "value": "random-token-here", "type": "text"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Rewards Index",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/rewards", "host": ["{{base_url}}"], "path": ["rewards"]}
+          }
+        },
+        {
+          "name": "Rewards Exchange",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/rewards/exchange", "host": ["{{base_url}}"], "path": ["rewards", "exchange"]},
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "product_id", "value": "1", "type": "text"},
+                {"key": "quantity", "value": "1", "type": "text"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Chatbot Sync",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/chatbot", "host": ["{{base_url}}"], "path": ["chatbot"]}
+          }
+        },
+        {
+          "name": "Chatbot Send",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/chatbot/send", "host": ["{{base_url}}"], "path": ["chatbot", "send"]},
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "message", "value": "Bagaimana cara mendapat poin?", "type": "text"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Admin Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/admin/dashboard", "host": ["{{base_url}}"], "path": ["admin", "dashboard"]}
+          }
+        },
+        {
+          "name": "Admin Verification Queue",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/admin/verification", "host": ["{{base_url}}"], "path": ["admin", "verification"]}
+          }
+        },
+        {
+          "name": "Admin Approve Deposit",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/admin/verification/1/approve", "host": ["{{base_url}}"], "path": ["admin", "verification", "1", "approve"]},
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "product_name", "value": "Botol Plastik Aqua", "type": "text"},
+                {"key": "category_id", "value": "1", "type": "text"},
+                {"key": "weight_gram", "value": "500", "type": "text"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Reject Deposit",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/admin/verification/1/reject", "host": ["{{base_url}}"], "path": ["admin", "verification", "1", "reject"]},
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "rejection_reason", "value": "Bukan sampah yang diterima", "type": "text"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin Scan QR Direct Setoran",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/admin/scan-qr", "host": ["{{base_url}}"], "path": ["admin", "scan-qr"]},
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key": "unique_code", "value": "USER123", "type": "text"},
+                {"key": "weight_gram", "value": "1000", "type": "text"},
+                {"key": "location_id", "value": "1", "type": "text"},
+                {"key": "category_id", "value": "1", "type": "text"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin User List",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/admin/users", "host": ["{{base_url}}"], "path": ["admin", "users"]}
+          }
+        },
+        {
+          "name": "Admin Reports",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}, {"key": "Authorization", "value": "Bearer {{token}}"}],
+            "url": {"raw": "{{base_url}}/admin/reports", "host": ["{{base_url}}"], "path": ["admin", "reports"]}
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# JavaScript
+**/node_modules/
+**/.next/
+**/npm-debug.log*
+
+# PHP/Laravel
+**/vendor/
+**/storage/logs/
+**/storage/framework/cache/
+**/storage/framework/sessions/
+**/storage/framework/views/
+
+# Flutter/Dart
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/pubspec.lock
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

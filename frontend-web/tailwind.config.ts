@@ -1,0 +1,111 @@
+import type { Config } from "tailwindcss";
+
+/**
+ * Design tokens diambil PERSIS dari konfigurasi Tailwind di mockup HTML
+ * (Smart Eco Bank). Skema warna mengikuti Material 3, font Manrope + JetBrains Mono.
+ */
+const config: Config = {
+  darkMode: "class",
+  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
+  theme: {
+    extend: {
+      colors: {
+        "surface-container": "#edeeef",
+        "error-container": "#ffdad6",
+        "on-secondary-fixed-variant": "#2f447d",
+        "on-surface-variant": "#3d4a3e",
+        "secondary-container": "#a8bcfe",
+        "secondary-fixed-dim": "#b4c5ff",
+        "on-primary": "#ffffff",
+        "primary-fixed": "#6bfe9c",
+        error: "#ba1a1a",
+        "outline-variant": "#bbcbbb",
+        "on-secondary": "#ffffff",
+        "on-tertiary-fixed": "#231b00",
+        "on-error": "#ffffff",
+        "on-tertiary": "#ffffff",
+        "surface-tint": "#006d37",
+        "on-secondary-container": "#364a84",
+        "on-error-container": "#93000a",
+        "primary-fixed-dim": "#4ae183",
+        surface: "#f8f9fa",
+        "surface-variant": "#e1e3e4",
+        "on-tertiary-fixed-variant": "#574500",
+        "tertiary-fixed-dim": "#eec209",
+        secondary: "#485c97",
+        "on-background": "#191c1d",
+        "on-tertiary-container": "#544300",
+        "surface-container-lowest": "#ffffff",
+        "tertiary-container": "#d7ae00",
+        "on-primary-fixed-variant": "#005228",
+        "secondary-fixed": "#dbe1ff",
+        "inverse-surface": "#2e3132",
+        "on-primary-container": "#005027",
+        "surface-container-high": "#e7e8e9",
+        "surface-container-low": "#f3f4f5",
+        "inverse-on-surface": "#f0f1f2",
+        "surface-container-highest": "#e1e3e4",
+        "tertiary-fixed": "#ffe084",
+        "surface-dim": "#d9dadb",
+        "primary-container": "#2ecc71",
+        "surface-bright": "#f8f9fa",
+        tertiary: "#735c00",
+        background: "#f8f9fa",
+        "on-surface": "#191c1d",
+        "on-primary-fixed": "#00210c",
+        primary: "#006d37",
+        "inverse-primary": "#4ae183",
+        outline: "#6c7b6d",
+        "on-secondary-fixed": "#00174b",
+      },
+      borderRadius: {
+        DEFAULT: "0.25rem",
+        lg: "0.5rem",
+        xl: "0.75rem",
+        full: "9999px",
+      },
+      spacing: {
+        "stack-md": "16px",
+        "container-padding-mobile": "16px",
+        "container-padding-desktop": "40px",
+        gutter: "24px",
+        "stack-sm": "8px",
+        "stack-lg": "32px",
+        base: "8px",
+      },
+      fontFamily: {
+        "headline-md": ["Manrope", "sans-serif"],
+        "headline-lg": ["Manrope", "sans-serif"],
+        "body-md": ["Manrope", "sans-serif"],
+        "body-lg": ["Manrope", "sans-serif"],
+        "headline-lg-mobile": ["Manrope", "sans-serif"],
+        "label-sm": ["JetBrains Mono", "monospace"],
+        button: ["Manrope", "sans-serif"],
+      },
+      fontSize: {
+        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+        "headline-lg": [
+          "40px",
+          { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" },
+        ],
+        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+        "headline-lg-mobile": [
+          "30px",
+          { lineHeight: "36px", letterSpacing: "-0.01em", fontWeight: "700" },
+        ],
+        "label-sm": [
+          "12px",
+          { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" },
+        ],
+        button: ["16px", { lineHeight: "20px", fontWeight: "600" }],
+      },
+      backgroundImage: {
+        "eco-gradient": "linear-gradient(135deg, #006d37 0%, #2ecc71 100%)",
+      },
+    },
+  },
+  plugins: [],
+};
+
+export default config;
