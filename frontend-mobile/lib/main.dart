@@ -8,7 +8,7 @@ import 'providers/transaction_provider.dart';
 import 'providers/reward_provider.dart';
 import 'providers/location_provider.dart';
 import 'providers/notification_provider.dart';
-import 'screens/auth/login_screen.dart';
+import 'screens/splash/splash_screen.dart';
 
 void main() {
   runApp(const LuminaEcoApp());
@@ -35,9 +35,7 @@ class LuminaEcoApp extends StatelessWidget {
         title: 'Lumina Eco',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
-        // Alur aplikasi dimulai dari layar login.
-        // Setelah login sukses, AuthProvider akan mengarahkan ke MainShell.
-        home: const LoginScreen(),
+        home: const SplashScreen(),
       ),
     );
   }

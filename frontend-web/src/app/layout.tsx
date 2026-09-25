@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { EchoProvider } from "@/context/EchoContext";
 import I18nProvider from "@/providers/I18nProvider";
+import OnboardingExperience from "@/components/OnboardingExperience";
 
 export const metadata: Metadata = {
   title: "Smart Eco Bank",
@@ -37,7 +38,10 @@ export default function RootLayout({
       <body className="font-body-md">
         <I18nProvider>
           <AuthProvider>
-            <EchoProvider>{children}</EchoProvider>
+            <EchoProvider>
+              {children}
+              <OnboardingExperience />
+            </EchoProvider>
           </AuthProvider>
         </I18nProvider>
       </body>

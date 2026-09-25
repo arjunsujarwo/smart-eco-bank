@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
+import '../onboarding/onboarding_screen.dart';
 
 /// M7 - Pengaturan. Profil, daftar setting, kartu dampak hijau, logout.
 class SettingsScreen extends StatelessWidget {
@@ -76,8 +77,7 @@ class SettingsScreen extends StatelessWidget {
                         border: Border.all(
                             color: AppColors.primaryContainer, width: 2),
                       ),
-                      child:
-                          const Icon(Icons.person, color: AppColors.primary),
+                      child: const Icon(Icons.person, color: AppColors.primary),
                     ),
                     Positioned(
                       bottom: -2,
@@ -109,8 +109,8 @@ class SettingsScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryContainer
-                              .withValues(alpha: 0.1),
+                          color:
+                              AppColors.primaryContainer.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(100),
                         ),
                         child: const Text('Ubah Profil',
@@ -151,6 +151,13 @@ class SettingsScreen extends StatelessWidget {
                 const Divider(height: 1, indent: 64),
                 _tile(Icons.help_outline, AppColors.primary,
                     'Bantuan & Dukungan'),
+                const Divider(height: 1, indent: 64),
+                _tile(Icons.menu_book_outlined, AppColors.secondary,
+                    'Lihat Panduan Lagi', onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+                  );
+                }),
               ],
             ),
           ),
@@ -225,15 +232,16 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Center(
             child: Text('Smart Eco Bank v2.4.1',
-                style: TextStyle(
-                    fontSize: 12, color: AppColors.onSurfaceVariant)),
+                style:
+                    TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant)),
           ),
         ],
       ),
     );
   }
 
-  Widget _tile(IconData icon, Color color, String label, {String? trailing}) =>
+  Widget _tile(IconData icon, Color color, String label,
+          {String? trailing, VoidCallback? onTap}) =>
       ListTile(
         leading: Container(
           width: 40,
@@ -254,6 +262,6 @@ class SettingsScreen extends StatelessWidget {
             const Icon(Icons.chevron_right, color: AppColors.onSurfaceVariant),
           ],
         ),
-        onTap: () {},
+        onTap: onTap,
       );
 }
