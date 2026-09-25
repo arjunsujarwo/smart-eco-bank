@@ -67,7 +67,13 @@ class ApiService {
     // authToken = data['token'];
     // return UserModel.fromJson(data['user']);
 
-    return _mockUser;
+    if (email.toLowerCase() == 'admin@example.com' && password == 'password') {
+      return _mockAdmin;
+    }
+    if (email.toLowerCase() == 'user@example.com' && password == 'password') {
+      return _mockUser;
+    }
+    throw Exception('Email atau password salah');
   }
 
   /// Registrasi akun baru.
@@ -421,6 +427,13 @@ class ApiService {
     pointBalance: 1250,
     greenLevel: 'Level 4: Green Hero',
   );
+
+  static const UserModel _mockAdmin = UserModel(
+    id: 'adm-001',
+    fullName: 'Admin Smart Eco Bank',
+    email: 'admin@example.com',
+    role: 'admin',
+  );
 }
 
 extension on UserModel {
@@ -435,6 +448,7 @@ extension on UserModel {
         avatarUrl: avatarUrl,
         pointBalance: pointBalance,
         greenLevel: greenLevel,
+        role: role,
       );
 }
 

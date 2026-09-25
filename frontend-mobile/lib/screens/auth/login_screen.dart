@@ -6,6 +6,7 @@ import '../../widgets/primary_button.dart';
 import '../../widgets/app_text_field.dart';
 import 'register_screen.dart';
 import '../main_shell.dart';
+import '../admin/admin_shell.dart';
 
 /// M1 - Login. "Masuk ke Akun Anda".
 class LoginScreen extends StatefulWidget {
@@ -16,7 +17,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _email = TextEditingController(text: 'budi@email.com');
+  final _email = TextEditingController(text: 'user@example.com');
   final _password = TextEditingController(text: 'password');
   bool _obscure = true;
 
@@ -33,7 +34,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     if (ok) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainShell()),
+        MaterialPageRoute(
+            builder: (_) =>
+                auth.isAdmin ? const AdminShell() : const MainShell()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

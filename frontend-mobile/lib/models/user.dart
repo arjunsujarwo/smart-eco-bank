@@ -8,6 +8,7 @@ class UserModel {
   final String? avatarUrl;
   final int pointBalance;
   final String greenLevel; // contoh: "Level 4: Green Hero"
+  final String role;
 
   const UserModel({
     required this.id,
@@ -18,6 +19,7 @@ class UserModel {
     this.avatarUrl,
     this.pointBalance = 0,
     this.greenLevel = '',
+    this.role = 'user',
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
@@ -29,6 +31,7 @@ class UserModel {
         avatarUrl: json['avatar_url'] ?? json['avatarUrl'],
         pointBalance: json['point_balance'] ?? json['pointBalance'] ?? 0,
         greenLevel: json['green_level'] ?? json['greenLevel'] ?? '',
+        role: json['role'] ?? 'user',
       );
 
   Map<String, dynamic> toJson() => {
@@ -40,5 +43,6 @@ class UserModel {
         'avatar_url': avatarUrl,
         'point_balance': pointBalance,
         'green_level': greenLevel,
+        'role': role,
       };
 }
