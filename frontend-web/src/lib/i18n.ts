@@ -14,10 +14,11 @@ i18n
       en: { translation: en },
     },
     fallbackLng: "id",
+    lng: "id",
     supportedLngs: ["id", "en"],
     detection: {
-      order: ["localStorage", "navigator"],
-      caches: ["localStorage"],
+      order: [],
+      caches: [],
       lookupLocalStorage: "smart-eco-lang",
     },
     interpolation: {

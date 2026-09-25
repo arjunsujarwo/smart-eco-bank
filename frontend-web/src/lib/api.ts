@@ -11,7 +11,10 @@ import type {
   User,
 } from "./types";
 
-export const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+export const BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(
+  /\/+$/,
+  "",
+);
 const API_URL = `${BASE_URL}/api`;
 
 let authToken: string | null = null;
@@ -897,5 +900,4 @@ export async function verifyUserPin(pin: string): Promise<void> {
     throw new Error((err as { message?: string }).message ?? "PIN salah");
   }
 }
-
 
