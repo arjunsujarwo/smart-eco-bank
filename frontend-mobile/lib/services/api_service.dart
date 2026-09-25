@@ -48,6 +48,24 @@ class ApiService {
     authToken = preferences.getString(_tokenKey);
   }
 
+  Future<UserModel?> restoreUser() async {
+    await restoreToken();
+    if (!isRemoteConfigured || authToken == null) return null;
+    try {
+      final response = await _request('user');
+      final data = response['data'];
+      if (data is! Map<String, dynamic>) {
+        throw const FormatException('Response profil API tidak valid');
+      }
+      return UserModel.fromJson(data);
+    } catch (_) {
+      authToken = null;
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.remove(_tokenKey);
+      return null;
+    }
+  }
+
   Future<Map<String, dynamic>> _request(
     String path, {
     String method = 'GET',
@@ -195,6 +213,29 @@ class ApiService {
     required String password,
     required String address,
   }) async {
+    if (isRemoteConfigured) {
+      final response = await _request(
+        'register',
+        method: 'POST',
+        body: {
+          'full_name': fullName,
+          'email': email,
+          'phone': phone,
+          'password': password,
+          'password_confirmation': password,
+          'address': address,
+        },
+      );
+      final token = response['token']?.toString();
+      final user = response['user'];
+      if (token == null || user is! Map<String, dynamic>) {
+        throw const FormatException('Response registrasi API tidak lengkap');
+      }
+      authToken = token;
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.setString(_tokenKey, token);
+      return UserModel.fromJson(user);
+    }
     await _mockDelay(1500);
 
     // REAL: kirim body di atas, parse token + user dari response.

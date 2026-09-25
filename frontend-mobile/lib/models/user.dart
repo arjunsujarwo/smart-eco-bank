@@ -29,7 +29,10 @@ class UserModel {
         phone: json['phone'] ?? '',
         address: json['address'] ?? '',
         avatarUrl: json['avatar_url'] ?? json['avatarUrl'],
-        pointBalance: json['point_balance'] ?? json['pointBalance'] ?? 0,
+        pointBalance: json['point_balance'] ??
+            json['total_points'] ??
+            json['pointBalance'] ??
+            0,
         greenLevel: json['green_level'] ?? json['greenLevel'] ?? '',
         role: json['role'] ?? 'user',
       );

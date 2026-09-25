@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../services/onboarding_preferences.dart';
 import '../../theme/app_colors.dart';
+import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../main_shell.dart';
+import '../admin/admin_shell.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -33,7 +37,9 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _openNext() async {
+    final auth = context.read<AuthProvider>();
     final completed = await OnboardingPreferences.isCompleted();
+    final restored = await auth.restoreSession();
     final fastAnimations = MediaQueryData.fromView(
             WidgetsBinding.instance.platformDispatcher.views.first)
         .disableAnimations;
@@ -44,8 +50,11 @@ class _SplashScreenState extends State<SplashScreen>
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: Duration(milliseconds: fastAnimations ? 0 : 350),
-        pageBuilder: (_, animation, __) =>
-            completed ? const LoginScreen() : const OnboardingScreen(),
+        pageBuilder: (_, animation, __) => !completed
+            ? const OnboardingScreen()
+            : restored
+                ? (auth.isAdmin ? const AdminShell() : const MainShell())
+                : const LoginScreen(),
         transitionsBuilder: (_, animation, __, child) =>
             FadeTransition(opacity: animation, child: child),
       ),
