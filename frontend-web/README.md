@@ -3,8 +3,8 @@
 Aplikasi frontend berbasis **Next.js** untuk sistem Smart Eco Bank. Repositori ini berjalan berdampingan dengan backend Laravel.
 
 ## 🚀 Prasyarat
-- **Node.js** (direkomendasikan versi 18 atau ke atas)
-- **npm** (atau `yarn` / `pnpm`)
+- **Node.js** `>=20.9.0` (LTS recommended)
+- **npm** `11.x` (atau `yarn` / `pnpm`)
 - Backend **Laravel Smart Eco Bank** yang sudah berjalan
 
 ---

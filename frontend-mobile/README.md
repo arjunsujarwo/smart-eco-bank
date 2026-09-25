@@ -13,6 +13,18 @@ flutter run
 
 Login mock sudah terisi otomatis: `budi@email.com` / `password` — tekan **Masuk**.
 
+## Testing
+
+```bash
+flutter test
+```
+
+Jalankan test widget dan analisa lint:
+
+```bash
+flutter analyze lib
+```
+
 ## Struktur folder
 
 ```

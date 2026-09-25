@@ -5,17 +5,19 @@ Selamat datang di *Smart Eco Bank*, sebuah platform revolusioner untuk menyetork
 ---
 
 ## 🛠️ Arsitektur Teknologi
-Aplikasi ini terbagi menjadi dua bagian:
-1. **Backend**: Laravel 11 + Laravel Reverb (untuk WebSocket Real-time)
-2. **Frontend**: Next.js (React)
+Aplikasi ini terbagi menjadi tiga bagian:
+1. **Backend**: Laravel 13.8 + Laravel Reverb (untuk WebSocket Real-time)
+2. **Frontend (Web)**: Next.js 16 (React + TypeScript)
+3. **Frontend (Mobile)**: Flutter 3.27+ (Dart)
 
 ---
 
 ## 📋 Prasyarat (Persiapan Sistem)
 Sebelum menjalankan project ini, pastikan komputer/laptop kamu sudah terinstall:
-- **PHP** (minimal v8.2) & **Composer**
-- **Node.js** (minimal v18) & **npm**
-- **Database Server** (MySQL/MariaDB via XAMPP, Laragon, dsb.)
+- **Backend**: PHP `^8.3` & **Composer 2.x**
+- **Frontend (Web)**: Node.js `>=20.9.0` & **npm 11.x** atau **yarn**
+- **Frontend (Mobile)**: Flutter `>=3.27.0` & Dart `>=3.6.0`
+- **Database Server**: MySQL/MariaDB atau PostgreSQL (konfigurasi di `.env`)
 - **Git** (Opsional)
 
 ---
@@ -27,7 +29,7 @@ Karena aplikasi ini terdiri dari Backend dan Frontend, kamu harus menjalankan ke
 ### Tahap 1: Setup Backend (Laravel)
 Buka terminal/CMD, lalu masuk ke folder backend:
 ```bash
-cd Backend-SEB
+cd backend
 ```
 1. Install dependencies (jika baru pertama kali):
    ```bash
@@ -35,7 +37,9 @@ cd Backend-SEB
    ```
 2. Salin pengaturan environment:
    ```bash
-   cp .env.example .env
+   copy .env.example .env
+   # atau pada Linux/Mac:
+   # cp .env.example .env
    ```
 3. Sesuaikan konfigurasi database di file `.env`:
    ```env
