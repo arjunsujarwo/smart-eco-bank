@@ -221,8 +221,9 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
-  Widget _footer() => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+  Widget _footer() => Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           const Text('Belum punya akun? ',
               style: TextStyle(color: AppColors.onSurfaceVariant)),
