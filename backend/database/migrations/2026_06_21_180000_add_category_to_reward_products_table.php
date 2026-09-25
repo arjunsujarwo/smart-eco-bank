@@ -8,15 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('reward_products', function (Blueprint $table) {
-            $table->string('category')->nullable()->after('product_name');
-        });
+        if (! Schema::hasColumn('reward_products', 'category')) {
+            Schema::table('reward_products', function (Blueprint $table) {
+                $table->string('category')->nullable()->after('product_name');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('reward_products', function (Blueprint $table) {
-            $table->dropColumn('category');
-        });
+        if (Schema::hasColumn('reward_products', 'category')) {
+            Schema::table('reward_products', function (Blueprint $table) {
+                $table->dropColumn('category');
+            });
+        }
     }
 };
