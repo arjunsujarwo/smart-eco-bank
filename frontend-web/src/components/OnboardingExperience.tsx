@@ -8,27 +8,51 @@ const ONBOARDING_KEY = "smart-eco-bank:onboarding-complete";
 
 const STEPS = [
   {
-    eyebrow: "01 · Setorkan",
-    title: "Ubah barang bekas jadi dampak nyata",
+    eyebrow: "01 · Beranda",
+    title: "Lihat semua progres dalam satu layar",
     description:
-      "Mulai dari satu botol atau kardus. Gunakan scanner untuk mencatat setoran dan melihat nilainya dalam hitungan detik.",
-    icon: "recycling",
+      "Pantau saldo poin, nilai rupiah, total sampah, dan dampak CO2 langsung dari dashboard.",
+    icon: "dashboard",
     color: "from-emerald-500 to-teal-500",
   },
   {
-    eyebrow: "02 · Pantau",
-    title: "Semua progres ada di satu tempat",
+    eyebrow: "02 · Setor sampah",
+    title: "Catat setoran dengan cepat",
     description:
-      "Dashboard membantu Anda memantau poin, riwayat setoran, dan jejak dampak lingkungan secara transparan.",
-    icon: "monitoring",
+      "Gunakan Scanner untuk membaca QR dari admin atau masukkan token setoran secara manual.",
+    icon: "qr_code_scanner",
     color: "from-sky-500 to-indigo-500",
   },
   {
-    eyebrow: "03 · Tumbuh bersama",
-    title: "Tukarkan poin, rawat bumi",
+    eyebrow: "03 · Lokasi posko",
+    title: "Temukan posko di sekitarmu",
     description:
-      "Kumpulkan poin dari kebiasaan baik dan tukarkan dengan reward pilihan Anda. Setiap langkah kecil berarti.",
-    icon: "eco",
+      "Buka Locations untuk melihat alamat, jam operasional, dan petunjuk arah menuju posko.",
+    icon: "location_on",
+    color: "from-lime-500 to-emerald-600",
+  },
+  {
+    eyebrow: "04 · Transaksi",
+    title: "Riwayat selalu tercatat rapi",
+    description:
+      "Periksa setoran, status verifikasi, poin, dan detail aktivitas melalui menu Transactions.",
+    icon: "receipt_long",
+    color: "from-violet-500 to-fuchsia-500",
+  },
+  {
+    eyebrow: "05 · Rewards",
+    title: "Tukar poin jadi manfaat nyata",
+    description:
+      "Pilih reward yang tersedia, lihat detailnya, dan tukarkan setelah saldo poin mencukupi.",
+    icon: "redeem",
+    color: "from-amber-500 to-orange-500",
+  },
+  {
+    eyebrow: "06 · Pengaturan",
+    title: "Atur akun dan minta bantuan",
+    description:
+      "Kelola profil, notifikasi, keamanan, dan buka panduan ini lagi kapan saja dari Settings.",
+    icon: "settings",
     color: "from-lime-500 to-emerald-600",
   },
 ];

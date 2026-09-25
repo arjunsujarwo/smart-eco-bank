@@ -18,27 +18,51 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final _pages = const [
     _OnboardingPage(
-      icon: Icons.account_balance_wallet_outlined,
-      eyebrow: 'MULAI DENGAN MUDAH',
-      title: 'Satu rekening,\nbanyak kebaikan',
+      icon: Icons.dashboard_outlined,
+      eyebrow: 'BERANDA',
+      title: 'Lihat semua progres\ndalam satu layar',
       description:
-          'Kelola finansial dan kontribusi hijaumu dalam satu pengalaman perbankan yang sederhana.',
+          'Pantau saldo poin, nilai rupiah, total sampah, dan dampak CO2 langsung dari dashboard.',
       color: AppColors.primary,
     ),
     _OnboardingPage(
-      icon: Icons.recycling_outlined,
-      eyebrow: 'SETIAP AKSI BERARTI',
-      title: 'Ubah kebiasaan\njadi dampak',
+      icon: Icons.qr_code_scanner_outlined,
+      eyebrow: 'SETOR SAMPAH',
+      title: 'Catat setoran\ndengan cepat',
       description:
-          'Pantau jejak karbon, setor sampah, dan temukan cara baru untuk hidup lebih berkelanjutan.',
+          'Ketuk tombol SETOR untuk membuka scanner QR dan mencatat setoran di posko terdekat.',
       color: AppColors.secondary,
     ),
     _OnboardingPage(
-      icon: Icons.auto_awesome_outlined,
-      eyebrow: 'TUMBUH BERSAMA',
-      title: 'Hadiah untuk\npilihan baikmu',
+      icon: Icons.location_on_outlined,
+      eyebrow: 'LOKASI POSKO',
+      title: 'Temukan posko\ndi sekitarmu',
       description:
-          'Kumpulkan poin dari aksi hijaumu dan tukarkan dengan berbagai reward yang bermakna.',
+          'Gunakan menu Locations untuk melihat posko, alamat, jam operasional, dan petunjuk arah.',
+      color: AppColors.tertiary,
+    ),
+    _OnboardingPage(
+      icon: Icons.receipt_long_outlined,
+      eyebrow: 'TRANSAKSI',
+      title: 'Riwayat selalu\ntercatat rapi',
+      description:
+          'Buka Transactions untuk memeriksa setoran, status verifikasi, poin, dan detail aktivitas.',
+      color: AppColors.primary,
+    ),
+    _OnboardingPage(
+      icon: Icons.redeem_outlined,
+      eyebrow: 'REWARDS',
+      title: 'Tukar poin jadi\nmanfaat nyata',
+      description:
+          'Pilih reward yang tersedia, lihat detailnya, lalu gunakan poin setelah saldo mencukupi.',
+      color: AppColors.secondary,
+    ),
+    _OnboardingPage(
+      icon: Icons.settings_outlined,
+      eyebrow: 'PENGATURAN',
+      title: 'Atur akun dan\nminta bantuan',
+      description:
+          'Kelola profil, notifikasi, keamanan, dan buka panduan ini lagi kapan saja dari Settings.',
       color: AppColors.tertiary,
     ),
   ];
