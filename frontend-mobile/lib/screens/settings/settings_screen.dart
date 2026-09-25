@@ -155,7 +155,8 @@ class SettingsScreen extends StatelessWidget {
                 _tile(Icons.menu_book_outlined, AppColors.secondary,
                     'Lihat Panduan Lagi', onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+                    MaterialPageRoute(
+                        builder: (_) => const OnboardingScreen(replay: true)),
                   );
                 }),
               ],

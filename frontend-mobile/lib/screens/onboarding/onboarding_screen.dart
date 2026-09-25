@@ -4,7 +4,12 @@ import '../../theme/app_colors.dart';
 import '../auth/login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  const OnboardingScreen({
+    super.key,
+    this.replay = false,
+  });
+
+  final bool replay;
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -51,9 +56,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _finish() async {
     await OnboardingPreferences.markCompleted();
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-    );
+    if (widget.replay) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
   }
 
   void _next() {
@@ -80,11 +89,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: _finish,
-                child: const Text('Lewati'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  if (widget.replay)
+                    IconButton(
+                      tooltip: 'Kembali',
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_back),
+                    ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: _finish,
+                    child: const Text('Lewati'),
+                  ),
+                ],
               ),
             ),
             Expanded(
@@ -117,6 +137,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Langkah ${_currentPage + 1} dari ${_pages.length}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 24),
