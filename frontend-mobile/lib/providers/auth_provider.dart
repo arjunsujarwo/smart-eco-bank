@@ -15,6 +15,10 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoggedIn => _user != null;
   bool get isAdmin => _user?.role == 'admin';
 
+  Future<void> restoreSession() async {
+    await _api.restoreToken();
+  }
+
   Future<bool> login(String email, String password) async {
     _setLoading(true);
     try {

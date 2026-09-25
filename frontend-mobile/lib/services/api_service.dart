@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/user.dart';
 import '../models/dashboard_data.dart';
 import '../models/transaction.dart';
@@ -26,10 +30,49 @@ class ApiService {
   static final ApiService instance = ApiService._();
 
   /// Ganti dengan base URL backend produksi/staging.
-  static const String baseUrl = 'https://api.smart-eco-bank.example.com';
+  static const String baseUrl = String.fromEnvironment(
+    'SEB_API_BASE_URL',
+    defaultValue: '',
+  );
+  static const String _tokenKey = 'smart_eco_bank_api_token';
 
   /// Token bearer disimpan di sini setelah login (atau dari secure storage).
   String? authToken;
+
+  bool get isRemoteConfigured => baseUrl.trim().isNotEmpty;
+
+  Future<void> restoreToken() async {
+    final preferences = await SharedPreferences.getInstance();
+    authToken = preferences.getString(_tokenKey);
+  }
+
+  Future<Map<String, dynamic>> _request(
+    String path, {
+    String method = 'GET',
+    Map<String, dynamic>? body,
+  }) async {
+    final uri = Uri.parse('${baseUrl.replaceAll(RegExp(r'/$'), '')}/$path');
+    final headers = <String, String>{
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      if (authToken != null) 'Authorization': 'Bearer $authToken',
+    };
+    final response = switch (method) {
+      'POST' => await http.post(uri, headers: headers, body: jsonEncode(body)),
+      _ => await http.get(uri, headers: headers),
+    };
+    final decoded = jsonDecode(response.body);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final message = decoded is Map<String, dynamic>
+          ? decoded['message']?.toString()
+          : null;
+      throw Exception(message ?? 'Server mengembalikan error ${response.statusCode}');
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Format response API tidak valid');
+    }
+    return decoded;
+  }
 
   /// Simulasi latency jaringan supaya UI loading state tetap kelihatan natural.
   Future<void> _mockDelay([int ms = 700]) =>
@@ -54,6 +97,22 @@ class ApiService {
   ///   Logic  : simpan token -> [authToken], lalu fetch dashboard.
   ///   Error  : 401 -> kredensial salah, 422 -> validasi gagal.
   Future<UserModel> login(String email, String password) async {
+    if (isRemoteConfigured) {
+      final response = await _request(
+        'login',
+        method: 'POST',
+        body: {'email': email, 'password': password},
+      );
+      final token = response['token']?.toString();
+      final user = response['user'];
+      if (token == null || user is! Map<String, dynamic>) {
+        throw const FormatException('Response login API tidak lengkap');
+      }
+      authToken = token;
+      final preferences = await SharedPreferences.getInstance();
+      await preferences.setString(_tokenKey, token);
+      return UserModel.fromJson(user);
+    }
     await _mockDelay();
 
     // REAL:
@@ -99,8 +158,13 @@ class ApiService {
   ///
   /// TODO(API): POST $baseUrl/auth/logout (header Authorization).
   Future<void> logout() async {
+    if (isRemoteConfigured && authToken != null) {
+      await _request('logout', method: 'POST');
+    }
     await _mockDelay(300);
     authToken = null;
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.remove(_tokenKey);
   }
 
   // ==========================================================================

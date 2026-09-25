@@ -11,6 +11,7 @@ import 'providers/notification_provider.dart';
 import 'screens/splash/splash_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const SmartEcoBankApp());
 }
 

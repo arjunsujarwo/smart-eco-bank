@@ -20,6 +20,20 @@ Akun admin membuka panel mobile khusus untuk verifikasi setoran, pengguna, dan
 reward. Data panel masih mock dan siap dihubungkan ke endpoint `/api/admin`
 backend.
 
+## Menghubungkan ke backend Laravel
+
+Tanpa parameter tambahan, aplikasi memakai mock data untuk demo offline. Untuk
+memakai database dan akun yang sama dengan web, jalankan dengan URL API Laravel:
+
+```bash
+flutter run -d windows --dart-define=SEB_API_BASE_URL=http://127.0.0.1:8000/api
+flutter run --dart-define=SEB_API_BASE_URL=https://api.example.com/api
+```
+
+Login mobile kemudian memakai `POST /api/login`, menyimpan token Sanctum secara
+lokal, dan mengirim token tersebut pada request berikutnya. Jangan memasukkan
+token atau credential database ke source code.
+
 ## Packaging
 
 Branding Smart Eco Bank sudah diterapkan pada launcher Android dan metadata
