@@ -38,6 +38,7 @@ class ApiService {
 
   /// Token bearer disimpan di sini setelah login (atau dari secure storage).
   String? authToken;
+  String? selectedLocationId;
 
   bool get isRemoteConfigured => baseUrl.trim().isNotEmpty;
 
@@ -66,12 +67,57 @@ class ApiService {
       final message = decoded is Map<String, dynamic>
           ? decoded['message']?.toString()
           : null;
-      throw Exception(message ?? 'Server mengembalikan error ${response.statusCode}');
+      throw Exception(
+          message ?? 'Server mengembalikan error ${response.statusCode}');
     }
     if (decoded is! Map<String, dynamic>) {
       throw const FormatException('Format response API tidak valid');
     }
     return decoded;
+  }
+
+  Future<Map<String, dynamic>> _requestUri(Uri uri) async {
+    final response = await http.get(uri, headers: {
+      'Accept': 'application/json',
+      if (authToken != null) 'Authorization': 'Bearer $authToken',
+    });
+    final decoded = jsonDecode(response.body);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Server mengembalikan error ${response.statusCode}');
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Format response API tidak valid');
+    }
+    return decoded;
+  }
+
+  List<TransactionModel> _mapTransactions(dynamic value, bool redeem) {
+    if (value is! List) return [];
+    return value.whereType<Map<String, dynamic>>().map((item) {
+      final status = item['status']?.toString();
+      final mappedStatus = status == 'completed' || status == 'success'
+          ? TxStatus.success
+          : status == 'rejected' || status == 'failed'
+              ? TxStatus.failed
+              : TxStatus.pending;
+      final points = redeem
+          ? -((item['total_points'] as num?)?.toInt() ?? 0)
+          : (item['earned_points'] as num?)?.toInt() ?? 0;
+      return TransactionModel(
+        id: item['id'].toString(),
+        type: redeem ? TxType.redeem : TxType.deposit,
+        title: redeem
+            ? (item['product_name'] ?? 'Penukaran Reward')
+            : (item['category_name'] ?? 'Setoran Sampah'),
+        poskoName: item['location_name'] ?? '',
+        time: item['date']?.toString() ?? '',
+        status: mappedStatus,
+        detail: redeem
+            ? '${item['quantity'] ?? 1} item'
+            : '${item['weight_gram'] ?? 0} gram',
+        points: points,
+      );
+    }).toList();
   }
 
   /// Simulasi latency jaringan supaya UI loading state tetap kelihatan natural.
@@ -180,6 +226,34 @@ class ApiService {
   ///     "impacts": [ { "icon", "title", "subtitle" } ]
   ///   }
   Future<DashboardData> getDashboard() async {
+    if (isRemoteConfigured) {
+      final response = await _request('dashboard');
+      final data = response['data'];
+      if (data is! Map<String, dynamic>) {
+        throw const FormatException('Response dashboard API tidak valid');
+      }
+      final totalPoint = data['totalPoint'] ?? data['point_balance'] ?? 0;
+      final pointValue = totalPoint is num
+          ? totalPoint
+          : num.tryParse(totalPoint.toString()) ?? 0;
+      final activities = data['last_activity'];
+      return DashboardData(
+        pointBalance: pointValue.toInt(),
+        rupiahValue: (pointValue * 100).toInt(),
+        totalWasteKg: 0,
+        co2ReducedKg: 0,
+        impacts: (activities is List ? activities : const [])
+            .whereType<Map<String, dynamic>>()
+            .map((item) => ImpactItem(
+                  iconKey: item['type'] == 'tukar' ? 'redeem' : 'recycling',
+                  title: item['type'] == 'tukar'
+                      ? (item['product_name'] ?? 'Penukaran Reward')
+                      : (item['category_name'] ?? 'Setoran Sampah'),
+                  subtitle: item['status']?.toString() ?? '',
+                ))
+            .toList(),
+      );
+    }
     await _mockDelay();
 
     // REAL:
@@ -217,6 +291,38 @@ class ApiService {
   ///              "is_open","lat","lng" } ]
   ///   Logic: backend hitung distance_km dari koordinat user.
   Future<List<DropLocation>> getLocations({String query = ''}) async {
+    if (isRemoteConfigured) {
+      final uri = Uri.parse(
+          '${baseUrl.replaceAll(RegExp(r'/$'), '')}/locations?lat=-6.2&long=106.8');
+      final response = await _requestUri(uri);
+      final data = response['data'];
+      final locations =
+          data is Map<String, dynamic> ? data['all_location'] : data;
+      if (locations is! List) {
+        throw const FormatException('Response lokasi API tidak valid');
+      }
+      final mappedLocations = locations
+          .whereType<Map<String, dynamic>>()
+          .map((item) => DropLocation(
+                id: item['id'].toString(),
+                name: item['location_name'] ?? '',
+                address: item['alamat'] ?? '',
+                distanceKm: (item['distance_km'] ?? 0).toDouble(),
+                openInfo: item['status'] ?? '',
+                isOpen: item['status']?.toString().toLowerCase() == 'buka',
+                lat: double.tryParse(item['lat']?.toString() ?? '') ?? 0,
+                lng: double.tryParse(item['long']?.toString() ?? '') ?? 0,
+              ))
+          .where((location) =>
+              query.isEmpty ||
+              location.name.toLowerCase().contains(query.toLowerCase()) ||
+              location.address.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+      if (mappedLocations.isNotEmpty) {
+        selectedLocationId ??= mappedLocations.first.id;
+      }
+      return mappedLocations;
+    }
     await _mockDelay();
 
     // REAL: GET dengan query param lat/lng/q, map list -> DropLocation.fromJson
@@ -332,6 +438,21 @@ class ApiService {
   ///   Resp : [ { ...TransactionModel } ]
   Future<List<TransactionModel>> getTransactions(
       {String filter = 'all'}) async {
+    if (isRemoteConfigured) {
+      final response = await _request('history');
+      final data = response['data'];
+      if (data is! Map<String, dynamic>) {
+        throw const FormatException('Response riwayat API tidak valid');
+      }
+      final deposits = _mapTransactions(data['setoran'], false);
+      final redemptions = _mapTransactions(data['tukar'], true);
+      final all = [...deposits, ...redemptions];
+      return switch (filter) {
+        'deposit' => deposits,
+        'redeem' => redemptions,
+        _ => all,
+      };
+    }
     await _mockDelay();
 
     // REAL: GET dengan query filter, map list -> TransactionModel.fromJson.
@@ -388,6 +509,23 @@ class ApiService {
   /// TODO(API): GET $baseUrl/rewards
   ///   Resp : [ { "id","name","point_cost","image_url","coming_soon" } ]
   Future<List<RewardModel>> getRewards() async {
+    if (isRemoteConfigured) {
+      final response = await _request('rewards');
+      final data = response['data'];
+      final products = data is Map<String, dynamic> ? data['products'] : data;
+      if (products is! List) {
+        throw const FormatException('Response reward API tidak valid');
+      }
+      return products
+          .whereType<Map<String, dynamic>>()
+          .map((item) => RewardModel(
+                id: item['id'].toString(),
+                name: item['product_name'] ?? '',
+                pointCost: (item['required_points'] as num?)?.toInt() ?? 0,
+                imageUrl: item['image_path'],
+              ))
+          .toList();
+    }
     await _mockDelay();
 
     // REAL: GET -> map list -> RewardModel.fromJson.
@@ -407,6 +545,19 @@ class ApiService {
   ///   Logic: validasi saldo poin cukup, potong poin, buat transaksi redeem.
   ///   Error: 402 -> poin tidak cukup.
   Future<bool> redeemReward(String rewardId) async {
+    if (isRemoteConfigured) {
+      final locationId = selectedLocationId;
+      if (locationId == null) {
+        throw Exception('Pilih lokasi pengambilan reward terlebih dahulu');
+      }
+      final response =
+          await _request('rewards/exchange', method: 'POST', body: {
+        'product_id': rewardId,
+        'quantity': 1,
+        'location_id': locationId,
+      });
+      return response['success'] == true;
+    }
     await _mockDelay(900);
     // REAL: POST, cek response.success.
     return true;
@@ -419,6 +570,24 @@ class ApiService {
   /// TODO(API): GET $baseUrl/notifications
   ///   Resp : [ { "id","icon","title","body","time_ago","group","read" } ]
   Future<List<AppNotification>> getNotifications() async {
+    if (isRemoteConfigured) {
+      final response = await _request('notifications');
+      final data = response['data'];
+      if (data is! List) {
+        throw const FormatException('Response notifikasi API tidak valid');
+      }
+      return data.whereType<Map<String, dynamic>>().map((item) {
+        return AppNotification(
+          id: item['id'].toString(),
+          iconKey: 'notifications',
+          title: item['title'] ?? '',
+          body: item['message'] ?? '',
+          timeAgo: item['created_at']?.toString() ?? '',
+          group: 'Terbaru',
+          read: item['is_read'] == true,
+        );
+      }).toList();
+    }
     await _mockDelay();
 
     // REAL: GET -> map list -> AppNotification.fromJson.
