@@ -9,6 +9,7 @@ import '../models/reward.dart';
 import '../models/drop_location.dart';
 import '../models/app_notification.dart';
 import '../models/scan_result.dart';
+import '../models/admin_data.dart';
 
 /// ============================================================================
 /// ApiService
@@ -576,6 +577,7 @@ class ApiService {
       if (data is! List) {
         throw const FormatException('Response notifikasi API tidak valid');
       }
+
       return data.whereType<Map<String, dynamic>>().map((item) {
         return AppNotification(
           id: item['id'].toString(),
@@ -630,6 +632,96 @@ class ApiService {
         read: true,
       ),
     ];
+  }
+
+  Future<List<AdminVerification>> getAdminVerifications() async {
+    if (!isRemoteConfigured) {
+      return const [
+        AdminVerification(
+            id: 'demo-1',
+            userName: 'Budi Santoso',
+            category: 'Kertas',
+            categoryId: 1,
+            weightGram: 2500,
+            status: 'pending'),
+      ];
+    }
+    final response = await _request('admin/verification');
+    final payload = response['data'];
+    final list =
+        payload is Map<String, dynamic> ? payload['transactions'] : payload;
+    if (list is! List)
+      throw const FormatException('Data verifikasi tidak valid');
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map(AdminVerification.fromJson)
+        .where((item) => item.status == 'pending')
+        .toList();
+  }
+
+  Future<void> approveAdminVerification(AdminVerification item) async {
+    if (!isRemoteConfigured) return;
+    final response = await _request('admin/verification/${item.id}/approve',
+        method: 'POST',
+        body: {
+          'product_name': item.category,
+          'category_id': item.categoryId,
+          'weight_gram': item.weightGram,
+        });
+    if (response['success'] != true) {
+      throw Exception('Gagal menyetujui setoran');
+    }
+  }
+
+  Future<void> rejectAdminVerification(String id) async {
+    if (!isRemoteConfigured) return;
+    await _request('admin/verification/$id/reject',
+        method: 'POST',
+        body: {'rejection_reason': 'Tidak memenuhi standar verifikasi'});
+  }
+
+  Future<List<AdminUser>> getAdminUsers() async {
+    if (!isRemoteConfigured) {
+      return const [
+        AdminUser(
+            id: 'demo-1',
+            name: 'Budi Santoso',
+            email: 'user@example.com',
+            role: 'user',
+            suspended: false),
+      ];
+    }
+    final response = await _request('admin/users');
+    final payload = response['data'];
+    final list = payload is Map<String, dynamic> ? payload['users'] : payload;
+    if (list is! List) throw const FormatException('Data pengguna tidak valid');
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map(AdminUser.fromJson)
+        .toList();
+  }
+
+  Future<void> suspendAdminUser(String id) async {
+    if (!isRemoteConfigured) return;
+    await _request('admin/users/$id/suspend', method: 'POST');
+  }
+
+  Future<List<AdminReward>> getAdminRewards() async {
+    if (!isRemoteConfigured) {
+      return const [
+        AdminReward(
+            id: 'demo-1', name: 'Tumbler Reusable', points: 500, active: true),
+      ];
+    }
+    final response = await _request('admin/rewards');
+    final payload = response['data'];
+    final list =
+        payload is Map<String, dynamic> ? payload['products'] : payload;
+    if (list is! List) throw const FormatException('Data reward tidak valid');
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map(AdminReward.fromJson)
+        .toList();
   }
 
   // ==========================================================================
