@@ -1,4 +1,4 @@
-# Lumina Eco — Smart Sustainable Banking (Bank Sampah Digital)
+# Smart Eco Bank — Smart Sustainable Banking (Bank Sampah Digital)
 
 Aplikasi Flutter (Android) hasil konversi dari 10 mockup HTML. Semua data masih
 berupa **mock data**, namun setiap titik yang nanti memanggil backend sudah

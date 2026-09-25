@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "lumina_eco" "\0"
+            VALUE "FileDescription", "Smart Eco Bank" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "lumina_eco" "\0"
+            VALUE "InternalName", "smart_eco_bank" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "lumina_eco.exe" "\0"
-            VALUE "ProductName", "lumina_eco" "\0"
+            VALUE "OriginalFilename", "smart_eco_bank.exe" "\0"
+            VALUE "ProductName", "Smart Eco Bank" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

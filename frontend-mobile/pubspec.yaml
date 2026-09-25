@@ -1,5 +1,5 @@
-name: lumina_eco
-description: Lumina Eco - Smart Sustainable Banking (Bank Sampah Digital)
+name: smart_eco_bank
+description: Smart Eco Bank - Platform Bank Sampah Digital
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -23,3 +23,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/smart_eco_bank_logo.png

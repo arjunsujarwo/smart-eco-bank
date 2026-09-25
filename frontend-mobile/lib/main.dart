@@ -11,11 +11,11 @@ import 'providers/notification_provider.dart';
 import 'screens/splash/splash_screen.dart';
 
 void main() {
-  runApp(const LuminaEcoApp());
+  runApp(const SmartEcoBankApp());
 }
 
-class LuminaEcoApp extends StatelessWidget {
-  const LuminaEcoApp({super.key});
+class SmartEcoBankApp extends StatelessWidget {
+  const SmartEcoBankApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class LuminaEcoApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: MaterialApp(
-        title: 'Lumina Eco',
+        title: 'Smart Eco Bank',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         home: const SplashScreen(),

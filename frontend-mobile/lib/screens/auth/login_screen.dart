@@ -53,7 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
           Positioned(
             top: -120,
             right: -80,
-            child: _blurBlob(280, AppColors.primaryContainer.withValues(alpha: 0.25)),
+            child: _blurBlob(
+                280, AppColors.primaryContainer.withValues(alpha: 0.25)),
           ),
           Positioned(
             bottom: -120,
@@ -117,8 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           icon: Icon(_obscure
                               ? Icons.visibility
                               : Icons.visibility_off),
-                          onPressed: () =>
-                              setState(() => _obscure = !_obscure),
+                          onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                       ),
                       Align(
@@ -161,11 +161,17 @@ class _LoginScreenState extends State<LoginScreen> {
               gradient: AppColors.ecoGradient,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.eco, color: Colors.white, size: 36),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                'assets/images/smart_eco_bank_logo.png',
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           const Text(
-            'Lumina Eco',
+            'Smart Eco Bank',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w600,
@@ -191,8 +197,8 @@ class _LoginScreenState extends State<LoginScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text('Atau masuk dengan',
-                style: TextStyle(
-                    fontSize: 12, color: AppColors.onSurfaceVariant)),
+                style:
+                    TextStyle(fontSize: 12, color: AppColors.onSurfaceVariant)),
           ),
           const Expanded(child: Divider(color: AppColors.outlineVariant)),
         ],

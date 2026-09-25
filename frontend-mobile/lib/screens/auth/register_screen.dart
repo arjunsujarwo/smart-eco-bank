@@ -74,10 +74,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(Icons.eco, color: AppColors.primary),
-            SizedBox(width: 8),
-            Text('Lumina',
+          children: [
+            Image.asset(
+              'assets/images/smart_eco_bank_logo.png',
+              width: 28,
+              height: 28,
+            ),
+            const SizedBox(width: 8),
+            const Text('Smart Eco Bank',
                 style: TextStyle(
                     color: AppColors.primary, fontWeight: FontWeight.bold)),
           ],
@@ -129,8 +133,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscure: _obscure,
                 controller: _password,
                 suffix: IconButton(
-                  icon: Icon(
-                      _obscure ? Icons.visibility : Icons.visibility_off),
+                  icon:
+                      Icon(_obscure ? Icons.visibility : Icons.visibility_off),
                   onPressed: () => setState(() => _obscure = !_obscure),
                 ),
               ),
@@ -177,7 +181,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 style: TextStyle(
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.w600)),
-                            TextSpan(text: ' Lumina Eco.'),
+                            TextSpan(text: ' Smart Eco Bank.'),
                           ],
                         ),
                       ),

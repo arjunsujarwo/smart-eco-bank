@@ -26,7 +26,7 @@ class ApiService {
   static final ApiService instance = ApiService._();
 
   /// Ganti dengan base URL backend produksi/staging.
-  static const String baseUrl = 'https://api.luminaeco.example.com';
+  static const String baseUrl = 'https://api.smart-eco-bank.example.com';
 
   /// Token bearer disimpan di sini setelah login (atau dari secure storage).
   String? authToken;
@@ -260,7 +260,8 @@ class ApiService {
   ///
   /// TODO(API): GET $baseUrl/transactions?filter={all|deposit|redeem}
   ///   Resp : [ { ...TransactionModel } ]
-  Future<List<TransactionModel>> getTransactions({String filter = 'all'}) async {
+  Future<List<TransactionModel>> getTransactions(
+      {String filter = 'all'}) async {
     await _mockDelay();
 
     // REAL: GET dengan query filter, map list -> TransactionModel.fromJson.
@@ -324,7 +325,8 @@ class ApiService {
       RewardModel(id: 'rw-1', name: 'Tumbler', pointCost: 50000),
       RewardModel(id: 'rw-2', name: 'Totebag', pointCost: 10000),
       RewardModel(id: 'rw-3', name: 'Topi', pointCost: 20000),
-      RewardModel(id: 'rw-4', name: 'Coming Soon', pointCost: 0, comingSoon: true),
+      RewardModel(
+          id: 'rw-4', name: 'Coming Soon', pointCost: 0, comingSoon: true),
     ];
   }
 
@@ -356,7 +358,7 @@ class ApiService {
         iconKey: 'check_circle',
         title: 'Setoran Plastik Berhasil (+1.000 Pts)',
         body:
-            'Terima kasih atas kontribusi Anda. Poin hijau telah ditambahkan ke saldo Lumina Eco Anda.',
+            'Terima kasih atas kontribusi Anda. Poin hijau telah ditambahkan ke saldo Smart Eco Bank Anda.',
         timeAgo: '2mnt',
         group: 'Terbaru',
       ),
@@ -374,7 +376,7 @@ class ApiService {
         iconKey: 'card_giftcard',
         title: 'Reward Tumbler Siap Diambil',
         body:
-            'Tukarkan kode QR Anda di EcoHub terdekat untuk mengambil Lumina Limited Edition Tumbler.',
+            'Tukarkan kode QR Anda di EcoHub terdekat untuk mengambil Smart Eco Bank Limited Edition Tumbler.',
         timeAgo: '4j lalu',
         group: 'Terbaru',
       ),

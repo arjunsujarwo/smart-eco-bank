@@ -91,11 +91,16 @@ class _SplashScreenState extends State<SplashScreen>
                             border: Border.all(
                                 color: Colors.white.withValues(alpha: 0.28)),
                           ),
-                          child: const Icon(Icons.eco,
-                              size: 52, color: Colors.white),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(18),
+                            child: Image.asset(
+                              'assets/images/smart_eco_bank_logo.png',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 22),
-                        const Text('Lumina Eco',
+                        const Text('Smart Eco Bank',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 30,

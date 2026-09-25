@@ -22,7 +22,7 @@ class _CustomerServiceScreenState extends State<CustomerServiceScreen> {
       id: 'm1',
       sender: ChatSender.bot,
       text:
-          "Hello! I'm Lumina Bot. How can I help you with your sustainable banking today?",
+          "Hello! I'm Smart Eco Bot. How can I help you with your sustainable banking today?",
       time: '09:41',
     ),
     const ChatMessage(
@@ -74,8 +74,7 @@ class _CustomerServiceScreenState extends State<CustomerServiceScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) {
         _scroll.animateTo(_scroll.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut);
+            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
       }
     });
   }
@@ -139,8 +138,8 @@ class _CustomerServiceScreenState extends State<CustomerServiceScreen> {
               children: [
                 Center(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(100),
@@ -169,8 +168,8 @@ class _CustomerServiceScreenState extends State<CustomerServiceScreen> {
         : AppColors.surfaceContainerHighest;
 
     final bubble = Container(
-      constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.7),
+      constraints:
+          BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: isUser ? AppColors.primary : AppColors.surfaceContainerHigh,
@@ -205,8 +204,7 @@ class _CustomerServiceScreenState extends State<CustomerServiceScreen> {
             CircleAvatar(
               radius: 20,
               backgroundColor: avatarColor,
-              child: Icon(
-                  m.sender == ChatSender.bot ? Icons.eco : Icons.person,
+              child: Icon(m.sender == ChatSender.bot ? Icons.eco : Icons.person,
                   color: m.sender == ChatSender.bot
                       ? AppColors.onPrimaryContainer
                       : AppColors.onSurfaceVariant),
@@ -235,8 +233,7 @@ class _CustomerServiceScreenState extends State<CustomerServiceScreen> {
                 child: Icon(Icons.person, color: AppColors.onSurfaceVariant)),
             const SizedBox(width: 12),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(14),
@@ -250,8 +247,7 @@ class _CustomerServiceScreenState extends State<CustomerServiceScreen> {
                           width: 6,
                           height: 6,
                           decoration: const BoxDecoration(
-                              color: AppColors.outline,
-                              shape: BoxShape.circle),
+                              color: AppColors.outline, shape: BoxShape.circle),
                         )),
               ),
             ),
