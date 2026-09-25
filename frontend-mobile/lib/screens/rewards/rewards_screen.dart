@@ -20,8 +20,8 @@ class _RewardsScreenState extends State<RewardsScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-        (_) => context.read<RewardProvider>().load());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => context.read<RewardProvider>().load());
   }
 
   Future<void> _redeem(RewardModel r) async {
@@ -35,8 +35,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
       context: context,
       builder: (_) => Dialog(
         backgroundColor: Colors.white,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(28),
           child: Column(
@@ -54,8 +53,7 @@ class _RewardsScreenState extends State<RewardsScreen> {
               ),
               const SizedBox(height: 24),
               const Text('Penukaran Sukses!',
-                  style:
-                      TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               const Text(
                 'Poin Anda telah dipotong. Produk akan segera dikirimkan ke alamat Anda.',
@@ -131,14 +129,33 @@ class _RewardsScreenState extends State<RewardsScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 24,
-                  crossAxisSpacing: 24,
-                  childAspectRatio: 0.72,
-                  children: prov.items.map(_rewardCard).toList(),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final columns = constraints.maxWidth >= 1000
+                        ? 4
+                        : constraints.maxWidth >= 650
+                            ? 3
+                            : 2;
+                    return Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 980),
+                        child: GridView.builder(
+                          itemCount: prov.items.length,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: columns,
+                            mainAxisSpacing: 14,
+                            crossAxisSpacing: 14,
+                            childAspectRatio: columns >= 3 ? 0.9 : 0.78,
+                          ),
+                          itemBuilder: (_, index) =>
+                              _rewardCard(prov.items[index]),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -152,21 +169,18 @@ class _RewardsScreenState extends State<RewardsScreen> {
           color: AppColors.surfaceVariant,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-              color: AppColors.outline,
-              style: BorderStyle.solid,
-              width: 1),
+              color: AppColors.outline, style: BorderStyle.solid, width: 1),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.inventory_2,
-                  size: 40, color: AppColors.outline),
-              const SizedBox(height: 8),
-              Text('Produk baru\nsegera hadir',
+              const Icon(Icons.inventory_2, size: 32, color: AppColors.outline),
+              const SizedBox(height: 6),
+              const Text('Produk baru\nsegera hadir',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 12, color: AppColors.onSurfaceVariant)),
+                  style: const TextStyle(
+                      fontSize: 11, color: AppColors.onSurfaceVariant)),
             ],
           ),
         ),
@@ -188,33 +202,36 @@ class _RewardsScreenState extends State<RewardsScreen> {
               width: double.infinity,
               color: Colors.white,
               child: const Icon(Icons.card_giftcard,
-                  size: 56, color: AppColors.primaryContainer),
+                  size: 42, color: AppColors.primaryContainer),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(9),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(r.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        fontSize: 13, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 2),
                 Text('${_num.format(r.pointCost)} pts',
                     style: const TextStyle(
-                        fontSize: 12, color: AppColors.primary)),
-                const SizedBox(height: 8),
+                        fontSize: 11, color: AppColors.primary)),
+                const SizedBox(height: 6),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 6),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8)),
                     ),
                     onPressed: () => _redeem(r),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Produk'),
+                    icon: const Icon(Icons.redeem, size: 15),
+                    label: const Text('Tukar', style: TextStyle(fontSize: 11)),
                   ),
                 ),
               ],
