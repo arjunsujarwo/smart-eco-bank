@@ -11,7 +11,27 @@ flutter pub get
 flutter run
 ```
 
-Login mock sudah terisi otomatis: `budi@email.com` / `password` — tekan **Masuk**.
+Login mock:
+
+- User: `user@example.com` / `password`
+- Admin terbatas: `admin@example.com` / `password`
+
+Akun admin membuka panel mobile khusus untuk verifikasi setoran, pengguna, dan
+reward. Data panel masih mock dan siap dihubungkan ke endpoint `/api/admin`
+backend.
+
+## Packaging
+
+Branding Smart Eco Bank sudah diterapkan pada launcher Android dan metadata
+Windows. Logo sumber berada di `assets/images/smart_eco_bank_logo.png`.
+
+```bash
+flutter build apk --release
+flutter build windows --release
+```
+
+Hasil Windows berada di `build/windows/x64/runner/Release/` dan APK berada di
+`build/app/outputs/flutter-apk/`.
 
 ## Testing
 
