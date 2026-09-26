@@ -297,9 +297,11 @@ function mapLocation(l: Record<string, unknown>): DropLocation {
   // Supabase stores availability as a boolean, while the former Laravel API
   // returned the Indonesian status label. Support both shapes so seeded
   // locations remain selectable after the migration.
-  const isActive = l.is_active !== undefined
-    ? Boolean(l.is_active)
-    : status === "Tersedia" || status === "Aktif";
+  const isActive = l.is_open !== undefined
+    ? Boolean(l.is_open)
+    : l.is_active !== undefined
+      ? Boolean(l.is_active)
+      : status === "Tersedia" || status === "Aktif";
   return {
     id: String(l.id ?? ""),
     name: (l.location_name ?? l.name ?? `Lokasi #${l.id}`) as string,
@@ -310,7 +312,7 @@ function mapLocation(l: Record<string, unknown>): DropLocation {
     openInfo: isFull
       ? "Lokasi penuh"
       : isActive
-        ? "Tersedia"
+        ? String(l.open_info ?? "Tersedia")
         : status || "Tidak aktif",
     visitorsToday: Number(l.visitors_today ?? l.visitorsToday ?? 0),
     lat: Number(l.lat ?? l.latitude ?? 0),
