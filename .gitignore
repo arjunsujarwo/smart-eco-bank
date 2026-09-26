@@ -21,8 +21,9 @@
 **/.flutter-plugins
 **/.flutter-plugins-dependencies
 
-# IDE and OS files
 .idea/
 .vscode/
 .DS_Store
 Thumbs.db
+release-dist/
+**/hs_err_pid*.log
