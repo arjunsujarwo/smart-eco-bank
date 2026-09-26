@@ -133,3 +133,37 @@ Berikut adalah *flow* yang wajib kamu coba:
 
 ---
 Selamat mencoba dan mari bantu hijaukan bumi! 🌿
+
+## Deployment portfolio: Neon + Render + Vercel
+
+Blueprint `../render.yaml` dan `Dockerfile` di folder ini menyiapkan Laravel
+sebagai API production di Render. Buat database PostgreSQL di Neon, lalu isi
+semua variable `sync: false` di dashboard Render. Jangan commit `.env`,
+`APP_KEY`, password database, atau token.
+
+Variable penting:
+
+```env
+APP_KEY=base64:...
+APP_URL=https://smart-eco-bank-api.onrender.com
+CORS_ALLOWED_ORIGINS=https://smart-eco-bank.vercel.app
+DB_CONNECTION=pgsql
+DB_HOST=...
+DB_PORT=5432
+DB_DATABASE=...
+DB_USERNAME=...
+DB_PASSWORD=...
+```
+
+Setelah deploy backend, masukkan URL API tersebut di Vercel sebagai:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://smart-eco-bank-api.onrender.com
+```
+
+URL Flutter production harus menyertakan suffix `/api`:
+
+```bash
+flutter build apk --release \
+  --dart-define=SEB_API_BASE_URL=https://smart-eco-bank-api.onrender.com/api
+```
