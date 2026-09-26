@@ -69,7 +69,9 @@ export function EchoProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const token = getStoredToken();
-    if (!token || !user?.id) return;
+    // Reverb belongs to the optional Laravel backend. The Supabase portfolio
+    // deployment intentionally runs without a persistent WebSocket server.
+    if (!process.env.NEXT_PUBLIC_REVERB_APP_KEY || !token || !user?.id) return;
 
     const instance = setupEcho(token);
     setEcho(instance);

@@ -16,6 +16,56 @@ export const BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(
   "",
 );
 const API_URL = `${BASE_URL}/api`;
+const SUPABASE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/+$/, "");
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
+const USE_SUPABASE_AUTH = Boolean(SUPABASE_URL && SUPABASE_KEY);
+
+/**
+ * `NEXT_PUBLIC_*` values are embedded when Next.js builds the application.
+ * Do not fall back to the Vercel origin: it has no Laravel `/api` routes and
+ * would otherwise make an undeployed API look like an invalid login.
+ */
+export function requireApiBaseUrl(): string {
+  if (!BASE_URL) {
+    throw new Error(
+      "Layanan API belum dikonfigurasi. Hubungi administrator untuk mengatur NEXT_PUBLIC_API_BASE_URL lalu deploy ulang aplikasi.",
+    );
+  }
+
+  return BASE_URL;
+}
+
+function mapSupabaseUser(user: Record<string, unknown>): User {
+  const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
+  return {
+    id: String(user.id ?? ""),
+    fullName: String(metadata.full_name ?? "Pengguna Smart Eco Bank"),
+    email: String(user.email ?? ""),
+    phone: String(metadata.phone ?? ""),
+    address: String(metadata.address ?? ""),
+    avatarUrl: null,
+    pointBalance: Number(metadata.total_points ?? 0),
+    greenLevel: String(metadata.green_level ?? "Eco Starter"),
+    totalGramSaved: Number(metadata.total_gram_saved ?? 0),
+    role: String(metadata.role ?? "user"),
+    hasPin: false,
+    isCanceled: false,
+  };
+}
+
+async function supabaseAuth(path: string, init: RequestInit): Promise<Record<string, unknown>> {
+  const res = await fetch(`${SUPABASE_URL}/auth/v1${path}`, {
+    ...init,
+    headers: {
+      apikey: SUPABASE_KEY,
+      "Content-Type": "application/json",
+      ...(init.headers ?? {}),
+    },
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(getApiErrorMessage(body, "Autentikasi gagal"));
+  return body as Record<string, unknown>;
+}
 
 let authToken: string | null = null;
 let onUnauthorized: (() => void) | null = null;
@@ -82,6 +132,23 @@ function mapUser(u: Record<string, unknown>): User {
 
 function unwrap(data: Record<string, unknown>): Record<string, unknown> {
   return (data.data as Record<string, unknown>) ?? data;
+}
+
+function getApiErrorMessage(data: unknown, fallback: string): string {
+  if (!data || typeof data !== "object") return fallback;
+
+  const payload = data as {
+    message?: unknown;
+    errors?: Record<string, unknown>;
+  };
+  if (typeof payload.message === "string" && payload.message.trim()) {
+    return payload.message;
+  }
+
+  const firstValidationError = Object.values(payload.errors ?? {})
+    .flat()
+    .find((message): message is string => typeof message === "string");
+  return firstValidationError ?? fallback;
 }
 
 async function apiFetch(
@@ -237,6 +304,19 @@ export async function login(
   email: string,
   password: string,
 ): Promise<AuthResponse> {
+  if (USE_SUPABASE_AUTH) {
+    const data = await supabaseAuth("/token?grant_type=password", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+    const token = String(data.access_token ?? "");
+    const user = mapSupabaseUser((data.user ?? {}) as Record<string, unknown>);
+    if (!token || !user.id) throw new Error("Respons autentikasi tidak valid");
+    setAuthToken(token);
+    setAuthRole(user.role);
+    return { token, user };
+  }
+  requireApiBaseUrl();
   const form = new FormData();
   form.append("email", email);
   form.append("password", password);
@@ -247,7 +327,7 @@ export async function login(
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error((err as { message?: string }).message ?? "Login gagal");
+    throw new Error(getApiErrorMessage(err, "Login gagal"));
   }
   const raw = await res.json();
   const data = unwrap(raw);
@@ -265,6 +345,33 @@ export async function register(payload: {
   password: string;
   address: string;
 }): Promise<AuthResponse> {
+  if (USE_SUPABASE_AUTH) {
+    const data = await supabaseAuth("/signup", {
+      method: "POST",
+      body: JSON.stringify({
+        email: payload.email,
+        password: payload.password,
+        data: {
+          full_name: payload.fullName,
+          phone: payload.phone,
+          address: payload.address,
+          role: "user",
+          total_points: 0,
+          green_level: "Eco Starter",
+          total_gram_saved: 0,
+        },
+      }),
+    });
+    const token = String((data.session as Record<string, unknown> | null)?.access_token ?? "");
+    const user = mapSupabaseUser((data.user ?? {}) as Record<string, unknown>);
+    if (!token) {
+      throw new Error("Pendaftaran berhasil. Periksa email Anda untuk mengonfirmasi akun sebelum masuk.");
+    }
+    setAuthToken(token);
+    setAuthRole(user.role);
+    return { token, user };
+  }
+  requireApiBaseUrl();
   const form = new FormData();
   form.append("full_name", payload.fullName);
   form.append("email", payload.email);
@@ -279,9 +386,7 @@ export async function register(payload: {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(
-      (err as { message?: string }).message ?? "Registrasi gagal",
-    );
+    throw new Error(getApiErrorMessage(err, "Registrasi gagal"));
   }
   const raw = await res.json();
   const data = unwrap(raw);
@@ -293,6 +398,11 @@ export async function register(payload: {
 }
 
 export async function logout(): Promise<void> {
+  if (USE_SUPABASE_AUTH) {
+    await supabaseAuth("/logout", { method: "POST", headers: authHeaders() }).catch(() => {});
+    setAuthToken(null);
+    return;
+  }
   await fetch(`${API_URL}/logout`, {
     method: "POST",
     headers: authHeaders(),
@@ -301,6 +411,10 @@ export async function logout(): Promise<void> {
 }
 
 export async function getUser(): Promise<User> {
+  if (USE_SUPABASE_AUTH) {
+    const user = await supabaseAuth("/user", { method: "GET", headers: authHeaders() });
+    return mapSupabaseUser(user);
+  }
   const res = await apiFetch(`${API_URL}/user`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Gagal memuat profil");
   const raw = await res.json();
@@ -312,6 +426,26 @@ export async function getUser(): Promise<User> {
 // ---------------------------------------------------------------------------
 
 export async function getDashboard(): Promise<DashboardData> {
+  if (USE_SUPABASE_AUTH) {
+    return {
+      totalWaste: 0,
+      recentTransactions: [],
+      popularRewards: [
+        {
+          id: "demo-tumbler",
+          name: "Tumbler Ramah Lingkungan",
+          description: "Reward demo untuk eksplorasi portfolio Smart Eco Bank.",
+          pointCost: 500,
+          category: "Lifestyle",
+          stock: 12,
+          stockMax: 20,
+          badge: "Demo",
+          image: null,
+          locationStocks: [],
+        },
+      ],
+    };
+  }
   const res = await apiFetch(`${API_URL}/dashboard`, {
     headers: authHeaders(),
   });

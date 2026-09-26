@@ -1,4 +1,4 @@
-import { BASE_URL, setAuthToken, setAuthRole, authHeaders, logout as adminLogout } from "./api";
+import { BASE_URL, requireApiBaseUrl, setAuthToken, setAuthRole, authHeaders, logout as adminLogout } from "./api";
 export { adminLogout };
 
 const API_URL = `${BASE_URL}/api`;
@@ -31,6 +31,7 @@ export async function adminLogin(
   email: string,
   password: string,
 ): Promise<boolean> {
+  requireApiBaseUrl();
   const form = new FormData();
   form.append("email", email);
   form.append("password", password);
