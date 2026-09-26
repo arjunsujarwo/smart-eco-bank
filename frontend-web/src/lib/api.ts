@@ -362,10 +362,20 @@ export async function register(payload: {
         },
       }),
     });
-    const token = String((data.session as Record<string, unknown> | null)?.access_token ?? "");
-    const user = mapSupabaseUser((data.user ?? {}) as Record<string, unknown>);
+    let token = String((data.session as Record<string, unknown> | null)?.access_token ?? "");
+    let user = mapSupabaseUser((data.user ?? {}) as Record<string, unknown>);
     if (!token) {
-      throw new Error("Pendaftaran berhasil. Periksa email Anda untuk mengonfirmasi akun sebelum masuk.");
+      // When email confirmation is disabled, Supabase can create the user without
+      // returning a session from /signup. Sign in once to create the app session.
+      const loginData = await supabaseAuth("/token?grant_type=password", {
+        method: "POST",
+        body: JSON.stringify({ email: payload.email, password: payload.password }),
+      });
+      token = String(loginData.access_token ?? "");
+      user = mapSupabaseUser((loginData.user ?? data.user ?? {}) as Record<string, unknown>);
+      if (!token) {
+        throw new Error("Pendaftaran berhasil, tetapi sesi tidak dapat dibuat. Silakan masuk kembali.");
+      }
     }
     setAuthToken(token);
     setAuthRole(user.role);
