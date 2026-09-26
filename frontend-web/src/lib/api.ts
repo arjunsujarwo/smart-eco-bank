@@ -67,6 +67,23 @@ async function supabaseAuth(path: string, init: RequestInit): Promise<Record<str
   return body as Record<string, unknown>;
 }
 
+async function supabaseData(path: string, init: RequestInit = {}): Promise<unknown> {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1${path}`, {
+    ...init,
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${getStoredToken() ?? ""}`,
+      Accept: "application/json",
+      ...(init.body ? { "Content-Type": "application/json" } : {}),
+      ...(init.headers ?? {}),
+    },
+  });
+  const text = await res.text();
+  const body = text ? JSON.parse(text) : null;
+  if (!res.ok) throw new Error(getApiErrorMessage(body, "Gagal terhubung ke Supabase"));
+  return body;
+}
+
 let authToken: string | null = null;
 let onUnauthorized: (() => void) | null = null;
 
@@ -423,7 +440,8 @@ export async function logout(): Promise<void> {
 export async function getUser(): Promise<User> {
   if (USE_SUPABASE_AUTH) {
     const user = await supabaseAuth("/user", { method: "GET", headers: authHeaders() });
-    return mapSupabaseUser(user);
+    const profile = (await supabaseData(`/profiles?id=eq.${user.id}&select=*`)) as Record<string, unknown>[];
+    return mapUser({ ...((user.user_metadata ?? {}) as Record<string, unknown>), ...user, ...(profile[0] ?? {}) });
   }
   const res = await apiFetch(`${API_URL}/user`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Gagal memuat profil");
@@ -437,23 +455,15 @@ export async function getUser(): Promise<User> {
 
 export async function getDashboard(): Promise<DashboardData> {
   if (USE_SUPABASE_AUTH) {
+    const [transactions, rewards, profile] = await Promise.all([
+      supabaseData("/transactions?select=*&order=created_at.desc&limit=5") as Promise<Record<string, unknown>[]>,
+      supabaseData("/rewards?select=*&order=id.asc&limit=3") as Promise<Record<string, unknown>[]>,
+      supabaseData("/profiles?select=total_gram_saved&limit=1") as Promise<Record<string, unknown>[]>,
+    ]);
     return {
-      totalWaste: 0,
-      recentTransactions: [],
-      popularRewards: [
-        {
-          id: "demo-tumbler",
-          name: "Tumbler Ramah Lingkungan",
-          description: "Reward demo untuk eksplorasi portfolio Smart Eco Bank.",
-          pointCost: 500,
-          category: "Lifestyle",
-          stock: 12,
-          stockMax: 20,
-          badge: "Demo",
-          image: null,
-          locationStocks: [],
-        },
-      ],
+      totalWaste: Number(profile[0]?.total_gram_saved ?? 0),
+      recentTransactions: transactions.map(mapTransaction),
+      popularRewards: rewards.map(mapReward),
     };
   }
   const res = await apiFetch(`${API_URL}/dashboard`, {
@@ -488,6 +498,11 @@ export async function getLocations(
   userLat?: number,
   userLong?: number,
 ): Promise<LocationsResult> {
+  if (USE_SUPABASE_AUTH) {
+    const rows = (await supabaseData("/locations?select=*&order=id.asc")) as Record<string, unknown>[];
+    const all = rows.map(mapLocation).filter((location) => !query || `${location.name} ${location.address}`.toLowerCase().includes(query.toLowerCase()));
+    return { near: all, all, selectedLocation: null };
+  }
   const params = new URLSearchParams();
 
   if (userLat !== undefined && userLong !== undefined) {
@@ -545,6 +560,10 @@ export async function getLocations(
 }
 
 export async function updateSelectedLocation(locationId: number | string): Promise<void> {
+  if (USE_SUPABASE_AUTH) {
+    localStorage.setItem("eco_selected_location", String(locationId));
+    return;
+  }
   const form = new FormData();
   form.append("location_id", String(locationId));
   const res = await apiFetch(`${API_URL}/locations/select`, {
@@ -563,6 +582,16 @@ export async function updateSelectedLocation(locationId: number | string): Promi
 // ---------------------------------------------------------------------------
 
 export async function analyzeWaste(image?: File): Promise<ScanResult> {
+  if (USE_SUPABASE_AUTH) {
+    const filename = image?.name.toLowerCase() ?? "";
+    const category = filename.includes("botol") || filename.includes("plastik") ? "Plastik" : filename.includes("kertas") ? "Kertas" : filename.includes("kaleng") ? "Logam" : "Plastik";
+    return {
+      depositorName: "", locationName: "", productName: category === "Kertas" ? "Kertas Daur Ulang" : category === "Logam" ? "Kaleng Aluminium" : "Botol Plastik",
+      category, tags: [category, "Dapat didaur ulang"], confidence: 88,
+      estimatedWeight: 500, estimatedPoint: 10,
+      message: "Klasifikasi demo berhasil. Sesuaikan berat sebelum mengirim setoran.",
+    };
+  }
   const form = new FormData();
   if (image) form.append("waste_image", image);
   const res = await apiFetch(`${API_URL}/ai-scan`, {
@@ -612,6 +641,13 @@ export async function submitDeposit(payload: {
   message?: string;
   imagePath?: string;
 }): Promise<Transaction> {
+  if (USE_SUPABASE_AUTH) {
+    const transaction = await supabaseData("/rpc/record_deposit", {
+      method: "POST",
+      body: JSON.stringify({ p_category: payload.category, p_product_name: payload.productName, p_weight_gram: Math.round(payload.weightGrams), p_location_id: Number(payload.locationId), p_confidence: payload.confidence ?? 88, p_message: payload.message ?? "" }),
+    });
+    return mapTransaction(transaction as Record<string, unknown>);
+  }
   const form = new FormData();
   form.append("product_name", payload.productName);
   form.append("category_name", payload.category);
@@ -649,6 +685,14 @@ export interface TransactionsResult {
 export async function getTransactions(
   filter: "all" | "deposit" | "redeem" = "all",
 ): Promise<TransactionsResult> {
+  if (USE_SUPABASE_AUTH) {
+    const [rows, profiles] = await Promise.all([
+      supabaseData("/transactions?select=*&order=created_at.desc") as Promise<Record<string, unknown>[]>,
+      supabaseData("/profiles?select=point_balance&limit=1") as Promise<Record<string, unknown>[]>,
+    ]);
+    const all = rows.map(mapTransaction);
+    return { transactions: filter === "all" ? all : all.filter((item) => item.type === filter), totalPoint: Number(profiles[0]?.point_balance ?? 0) };
+  }
   const res = await apiFetch(`${API_URL}/history`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Gagal memuat riwayat");
   const raw = await res.json();
@@ -672,6 +716,10 @@ export async function getTransactions(
 export async function getTransactionDetail(
   id: string,
 ): Promise<Transaction | null> {
+  if (USE_SUPABASE_AUTH) {
+    const rows = await supabaseData(`/transactions?id=eq.${encodeURIComponent(id)}&select=*`) as Record<string, unknown>[];
+    return rows[0] ? mapTransaction(rows[0]) : null;
+  }
   const res = await apiFetch(`${API_URL}/history/${id}`, {
     headers: authHeaders(),
   });
@@ -732,6 +780,19 @@ export async function confirmDelivery(id: string): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export async function getRewards(category = "All"): Promise<Reward[]> {
+  if (USE_SUPABASE_AUTH) {
+    const [rewardRows, locationRows] = await Promise.all([
+      supabaseData("/rewards?select=*&order=id.asc") as Promise<Record<string, unknown>[]>,
+      supabaseData("/locations?select=*&order=id.asc") as Promise<Record<string, unknown>[]>,
+    ]);
+    const all = rewardRows.map((reward) => ({
+      ...mapReward(reward),
+      locationStocks: locationRows.map((location) => ({
+        locationId: Number(location.id), locationName: String(location.name), address: String(location.address), stock: Number(reward.stock ?? 0),
+      })),
+    }));
+    return category === "All" ? all : all.filter((reward) => reward.category === category);
+  }
   const res = await apiFetch(`${API_URL}/rewards`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Gagal memuat reward");
   const data = await res.json();
@@ -747,6 +808,10 @@ export async function redeemReward(
   quantity = 1,
   locationId: number,
 ): Promise<{ success: boolean; newBalance: number }> {
+  if (USE_SUPABASE_AUTH) {
+    const balance = await supabaseData("/rpc/redeem_reward", { method: "POST", body: JSON.stringify({ p_reward_id: Number(rewardId), p_quantity: quantity }) });
+    return { success: true, newBalance: Number(balance ?? 0) };
+  }
   const form = new FormData();
   form.append("product_id", rewardId);
   form.append("quantity", String(quantity));
@@ -880,6 +945,15 @@ const NOTIF_ICON: Record<string, string> = {
 };
 
 export async function getNotifications(): Promise<AppNotification[]> {
+  if (USE_SUPABASE_AUTH) {
+    const items = await supabaseData("/notifications?select=*&order=created_at.desc") as Record<string, unknown>[];
+    const today = new Date().toDateString();
+    return items.map((n) => {
+      const createdAt = String(n.created_at ?? "");
+      const date = createdAt ? new Date(createdAt).toDateString() : today;
+      return { id: String(n.id), iconKey: NOTIF_ICON[String(n.reference_type ?? "")] ?? "notifications", title: String(n.title), body: String(n.body), timeAgo: notifTimeAgo(createdAt), group: date === today ? "Terbaru" : "Lebih Lama", read: Boolean(n.is_read) };
+    });
+  }
   const res = await apiFetch(`${API_URL}/notifications`, { headers: authHeaders() });
   if (!res.ok) return [];
   const data = await res.json();
@@ -912,6 +986,10 @@ export async function getNotifications(): Promise<AppNotification[]> {
 }
 
 export async function markNotificationRead(id: string): Promise<void> {
+  if (USE_SUPABASE_AUTH) {
+    await supabaseData(`/notifications?id=eq.${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify({ is_read: true }) });
+    return;
+  }
   await apiFetch(`${API_URL}/notifications/${id}/read`, {
     method: "POST",
     headers: authHeaders(),
@@ -919,6 +997,10 @@ export async function markNotificationRead(id: string): Promise<void> {
 }
 
 export async function deleteNotification(id: string): Promise<void> {
+  if (USE_SUPABASE_AUTH) {
+    await supabaseData(`/notifications?id=eq.${encodeURIComponent(id)}`, { method: "DELETE" });
+    return;
+  }
   const res = await apiFetch(`${API_URL}/notifications/${id}/delete`, {
     method: "POST",
     headers: authHeaders(),
@@ -930,6 +1012,10 @@ export async function deleteNotification(id: string): Promise<void> {
 }
 
 export async function deleteAllNotifications(): Promise<void> {
+  if (USE_SUPABASE_AUTH) {
+    await supabaseData("/notifications?id=not.is.null", { method: "DELETE" });
+    return;
+  }
   const res = await apiFetch(`${API_URL}/notifications/delete-all`, {
     method: "POST",
     headers: authHeaders(),
@@ -951,6 +1037,11 @@ export interface ScanQrResult {
 }
 
 export async function scanQr(qrToken: string): Promise<ScanQrResult> {
+  if (USE_SUPABASE_AUTH) {
+    if (!qrToken.trim()) throw new Error("Masukkan kode QR terlebih dahulu");
+    const profile = await supabaseData("/profiles?select=point_balance&limit=1") as Record<string, unknown>[];
+    return { pointsEarned: 0, totalPoints: Number(profile[0]?.point_balance ?? 0), message: "QR demo tervalidasi. Gunakan alur Setor Sampah untuk menambah poin." };
+  }
   const form = new FormData();
   form.append("qr_token", qrToken);
   const res = await apiFetch(`${API_URL}/scan-qr`, {
@@ -976,6 +1067,15 @@ export async function scanQr(qrToken: string): Promise<ScanQrResult> {
 // ---------------------------------------------------------------------------
 
 export async function updateUserProfile(payload: { fullName?: string; phone?: string; address?: string; photo?: File | null }): Promise<void> {
+  if (USE_SUPABASE_AUTH) {
+    const user = await supabaseAuth("/user", { method: "GET", headers: authHeaders() });
+    await supabaseData(`/profiles?id=eq.${user.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ ...(payload.fullName ? { full_name: payload.fullName } : {}), ...(payload.phone ? { phone: payload.phone } : {}), ...(payload.address ? { address: payload.address } : {}), updated_at: new Date().toISOString() }),
+    });
+    await supabaseAuth("/user", { method: "PUT", headers: authHeaders(), body: JSON.stringify({ data: { ...(payload.fullName ? { full_name: payload.fullName } : {}), ...(payload.phone ? { phone: payload.phone } : {}), ...(payload.address ? { address: payload.address } : {}) } }) });
+    return;
+  }
   const form = new FormData();
   if (payload.fullName) form.append("full_name", payload.fullName);
   if (payload.phone) form.append("phone", payload.phone);
@@ -1002,6 +1102,11 @@ export async function deleteUserPhoto(): Promise<void> {
 }
 
 export async function updateUserPassword(payload: { currentPassword: string; newPassword: string; newPasswordConfirmation: string }): Promise<void> {
+  if (USE_SUPABASE_AUTH) {
+    if (payload.newPassword !== payload.newPasswordConfirmation) throw new Error("Konfirmasi kata sandi tidak cocok");
+    await supabaseAuth("/user", { method: "PUT", headers: authHeaders(), body: JSON.stringify({ password: payload.newPassword }) });
+    return;
+  }
   const res = await fetch(`${API_URL}/profile/password`, {
     method: "POST",
     headers: { ...authHeaders(), "Content-Type": "application/json" },
