@@ -754,6 +754,21 @@ export async function getRewardOrderDetail(id: string): Promise<{
   pickupLocationName?: string;
   pickupLocationAddress?: string;
 }> {
+  if (USE_SUPABASE_AUTH) {
+    const transaction = await supabaseData(`/transactions?id=eq.${encodeURIComponent(id)}&select=*`) as Record<string, unknown>[];
+    const order = transaction[0];
+    if (!order || String(order.type) !== "redeem") throw new Error("Pesanan reward tidak ditemukan");
+    return {
+      status: String(order.status ?? "Diproses"),
+      tracking: [{
+        status: String(order.status ?? "Diproses"),
+        label: "Permintaan reward tercatat",
+        description: "Reward akan disiapkan oleh mitra Smart Eco Bank.",
+        date: String(order.created_at ?? new Date().toISOString()),
+        is_completed: true,
+      }],
+    };
+  }
   const res = await apiFetch(`${API_URL}/rewards/orders/${id}`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Gagal memuat detail pesanan");
   const raw = await res.json();
@@ -770,6 +785,13 @@ export async function getRewardOrderDetail(id: string): Promise<{
 }
 
 export async function confirmDelivery(id: string): Promise<void> {
+  if (USE_SUPABASE_AUTH) {
+    await supabaseData(`/transactions?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: "Selesai" }),
+    });
+    return;
+  }
   const res = await apiFetch(`${API_URL}/rewards/orders/${id}/confirm`, {
     method: "POST",
     headers: authHeaders(),
@@ -842,6 +864,11 @@ export async function redeemReward(
 // ---------------------------------------------------------------------------
 
 export async function getChatHistory(): Promise<{ messages: ChatMessage[]; chatId: number | null }> {
+  if (USE_SUPABASE_AUTH) {
+    if (typeof window === "undefined") return { messages: initialSupportMessages(), chatId: null };
+    const saved = localStorage.getItem("eco_support_messages");
+    return { messages: saved ? JSON.parse(saved) as ChatMessage[] : initialSupportMessages(), chatId: null };
+  }
   const res = await apiFetch(`${API_URL}/chatbot`, { headers: authHeaders() });
   if (!res.ok) return { messages: initialSupportMessages(), chatId: null };
   const data = await res.json();
@@ -895,6 +922,19 @@ export async function getChatHistory(): Promise<{ messages: ChatMessage[]; chatI
 export async function sendSupportMessage(
   message: string,
 ): Promise<{ chatId: number | null }> {
+  if (USE_SUPABASE_AUTH) {
+    if (typeof window !== "undefined") {
+      const existing = await getChatHistory();
+      const now = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+      const messages: ChatMessage[] = [...existing.messages, {
+        id: `msg_${Date.now()}`, sender: "user", senderName: "Anda", text: message, timeLabel: now,
+      }, {
+        id: `reply_${Date.now()}`, sender: "agent", senderName: "Sarah", text: "Pesan Anda sudah kami terima. Tim kami akan segera membantu.", timeLabel: now,
+      }];
+      localStorage.setItem("eco_support_messages", JSON.stringify(messages));
+    }
+    return { chatId: null };
+  }
   const form = new FormData();
   form.append("message", message);
   const res = await apiFetch(`${API_URL}/chatbot/send`, {
@@ -1099,6 +1139,7 @@ export async function updateUserProfile(payload: { fullName?: string; phone?: st
 }
 
 export async function deleteUserPhoto(): Promise<void> {
+  if (USE_SUPABASE_AUTH) return;
   const res = await fetch(`${API_URL}/profile/photo`, {
     method: "DELETE",
     headers: authHeaders(),
@@ -1128,6 +1169,12 @@ export async function updateUserPassword(payload: { currentPassword: string; new
 }
 
 export async function updateUserPin(payload: { currentPin?: string; newPin: string; newPinConfirmation: string }): Promise<void> {
+  if (USE_SUPABASE_AUTH) {
+    if (payload.newPin !== payload.newPinConfirmation) throw new Error("Konfirmasi PIN tidak cocok");
+    if (!/^\d{6}$/.test(payload.newPin)) throw new Error("PIN harus terdiri dari 6 angka");
+    localStorage.setItem("eco_pin", payload.newPin);
+    return;
+  }
   const res = await fetch(`${API_URL}/profile/pin`, {
     method: "POST",
     headers: { ...authHeaders(), "Content-Type": "application/json" },
@@ -1144,6 +1191,10 @@ export async function updateUserPin(payload: { currentPin?: string; newPin: stri
 }
 
 export async function verifyUserPin(pin: string): Promise<void> {
+  if (USE_SUPABASE_AUTH) {
+    if (localStorage.getItem("eco_pin") !== pin) throw new Error("PIN salah");
+    return;
+  }
   const res = await fetch(`${API_URL}/profile/verify-pin`, {
     method: "POST",
     headers: { ...authHeaders(), "Content-Type": "application/json" },
