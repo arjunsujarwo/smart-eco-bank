@@ -26,7 +26,10 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($categories as $cat) {
-            WasteCategory::create($cat);
+            WasteCategory::firstOrCreate(
+                ['category_name' => $cat['category_name']],
+                $cat
+            );
         }
 
         // 2. Seed Lokasi Pengepul
@@ -37,7 +40,10 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($locations as $loc) {
-            CollectionLocation::create($loc);
+            CollectionLocation::firstOrCreate(
+                ['location_name' => $loc['location_name']],
+                $loc
+            );
         }
 
         // 3. Seed Pivot Kapasitas Kategori per Lokasi
@@ -46,15 +52,16 @@ class DatabaseSeeder extends Seeder
 
         foreach ($allLocs as $loc) {
             foreach ($allCats as $cat) {
-                $capacity = 1000000; // 1 ton (1 juta gram)
-                $current_load = 0;
-
-                LocationCategory::create([
-                    'location_id' => $loc->id,
-                    'category_id' => $cat->id,
-                    'capacity' => $capacity,
-                    'current_load' => $current_load,
-                ]);
+                LocationCategory::firstOrCreate(
+                    [
+                        'location_id' => $loc->id,
+                        'category_id' => $cat->id,
+                    ],
+                    [
+                        'capacity' => 1000000, // 1 ton (1 juta gram)
+                        'current_load' => 0,
+                    ]
+                );
             }
         }
 
@@ -66,28 +73,35 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($rewards as $rwd) {
-            RewardProduct::create($rwd);
+            RewardProduct::firstOrCreate(
+                ['product_name' => $rwd['product_name']],
+                $rwd
+            );
         }
 
         // 5. Seed User & Admin Accounts
-        User::create([
-            'full_name' => 'Budi Santoso',
-            'email' => 'user@example.com',
-            'phone' => '08123456789',
-            'address' => 'Jl. Kebon Jeruk No. 12, Jakarta Barat',
-            'password' => bcrypt('password'),
-            'role' => 'user',
-            'total_points' => 25000, // Mulai dengan 25k poin untuk testing penukaran
-        ]);
+        User::firstOrCreate(
+            ['email' => 'user@example.com'],
+            [
+                'full_name' => 'Budi Santoso',
+                'phone' => '08123456789',
+                'address' => 'Jl. Kebon Jeruk No. 12, Jakarta Barat',
+                'password' => bcrypt('password'),
+                'role' => 'user',
+                'total_points' => 25000, // Mulai dengan 25k poin untuk testing penukaran
+            ]
+        );
 
-        User::create([
-            'full_name' => 'Lumina Admin',
-            'email' => 'admin@example.com',
-            'phone' => '08987654321',
-            'address' => 'Kantor Pusat Smart Eco Bank',
-            'password' => bcrypt('password'),
-            'role' => 'admin',
-            'total_points' => 0,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'full_name' => 'Lumina Admin',
+                'phone' => '08987654321',
+                'address' => 'Kantor Pusat Smart Eco Bank',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+                'total_points' => 0,
+            ]
+        );
     }
 }
